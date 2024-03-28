@@ -1,1 +1,1 @@
-# Bomb_Party_Solver
+# Bomb_Party_Bot

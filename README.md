@@ -1,6 +1,5 @@
 # Bomb_Party_Bot
 A bot made to play the JKLM game Bomb Party
-also my reason to figure out machine learning
 
 # Todo
 - get the values of the bomb

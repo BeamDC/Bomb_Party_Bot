@@ -3,6 +3,16 @@
 // Letter scores are besed upon the score for each letter in Scrabble
 // This helps to prioritize less common letters
 
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <execution>
+using namespace std; //ik this is lazy
+
+vector<pair<string,int>> words_and_scores;
+
 bool _sort (pair<string,int> w1, pair<string,int> w2){
     return w1.second > w2.second;
 }

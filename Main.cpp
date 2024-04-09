@@ -9,6 +9,7 @@ using namespace std;
 //probalby hold the values in the form:
 //umap<String, vector<String>>
 vector<pair<string,int>> words_and_scores;
+vector<string> used_words;
 
 bool _sort (pair<string,int> w1, pair<string,int> w2){
     return w1.second > w2.second;
@@ -52,20 +53,47 @@ void sort_words_by_unique(){
     sort(execution::par, words_and_scores.begin(), words_and_scores.end(),_sort);
 }
 
-//currently non functional
-// void save_sorted_words(){
-//     ofstream output_sorted("Sortedwords.txt", ios::out);
-//     for(const auto& word : words){
-//         output_sorted << word << '\n';
-//     }
-//     output_sorted.close();
-// }
+string find_best_word(string prompt){
+    string best;
+    for(int i=0; i<words_and_scores.size(); ++i){
+        best = words_and_scores[i].first;
+        if(best.find(prompt) != string::npos 
+            && count(used_words.begin(), used_words.end(), best) == 0){
+                used_words.emplace_back(best);
+                break;
+            }
+        else if(i==words_and_scores.size()-1){
+            return "NO MATCH FOUND!";
+        }
+    }
+    return best;
+}
+
+int save_sorted_words(){
+    ofstream outf{"Sortedwords.txt"};
+
+    if (!outf)
+    {
+        cerr << "Sortedwords.txt no open!\n";
+        return 1;
+    }
+
+    for(int i=0; i<words_and_scores.size(); ++i){
+        outf << words_and_scores[i].first << " - " << words_and_scores[i].second << '\n';
+    }
+    return 0;
+}
 
 int main(){
     sort_words_by_unique();
-    for(const auto& x : words_and_scores){
-        cout << x.first << " - " << x.second << '\n';
-    }
-    //save_sorted_words();
+
+    // for(int i=0; i<words_and_scores.size(); ++i){
+    //     cout << words_and_scores[i].first << " - " << words_and_scores[i].second << '\n';
+    // }
+
+    cout << '\n' << find_best_word("op");
+    cout << '\n' << find_best_word("op");
+    cout << '\n' << find_best_word("he");
+    // save_sorted_words();
     return 0;
 }

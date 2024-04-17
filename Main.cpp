@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <execution>
 using namespace std; //ik this is lazy
 
 vector<pair<string,int>> words_and_scores;

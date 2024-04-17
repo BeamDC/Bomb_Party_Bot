@@ -5,14 +5,13 @@
 #include <algorithm>
 using namespace std; //ik this is lazy
 
+const int total_words = 267750;
 vector<pair<string,int>> words_and_scores;
 vector<string> words(total_words);
 vector<string> used_words(total_words);
 
 const string sorted_path = "Sorted_Words.txt";
 const string unsorted_path = "Wordlist.txt";
-
-const int total_words = 267750;
 
 bool _sort (pair<string,int> w1, pair<string,int> w2){
     return w1.second > w2.second;

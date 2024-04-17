@@ -26,8 +26,10 @@ int calculate_score(string w){
             {'B',3},{'C',3},{'M',3},{'P',3},
             {'F',4},{'H',4},{'V',4},{'W',4},{'Y',4},
             {'K',5},
-            {'J',8},{'X',8},
-            {'Q',10},{'Z',10},
+            {'J',8},{'X',0},
+            {'Q',10},{'Z',0},
+            //Z and X are special cases, as they are not required to get an extra life
+            //therefore it is better to ignore them entirely
     };
     sort(w.begin(), w.end());
     w.erase(unique(w.begin(), w.end()), w.end());

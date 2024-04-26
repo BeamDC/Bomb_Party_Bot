@@ -8,3 +8,4 @@ A bot made to play the JKLM game Bomb Party
 - track all used words, so they are not repeated again (COMPLETE)
 - everytime a good word is found, store it, and write it if taking too long to find best word (safety, might not need)
 - output the best word (COMPLETE)
+- remove sorting.cpp, it is no longer needed.

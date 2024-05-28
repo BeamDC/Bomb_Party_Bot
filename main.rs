@@ -42,7 +42,7 @@ fn main() {
     use std::time::Instant;
     let now = Instant::now();
 
-    let mut vec: Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Wordlist.txt"){
+    let mut vec: Vec<String> = match file_to_vec("Wordlist.txt"){
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };

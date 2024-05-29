@@ -1,9 +1,8 @@
 use std::fs::File;
-use std::cmp::Reverse;
 use std::path::Path;
-use std::collections::{HashSet, HashMap};
+use std::collections::HashMap;
 use std::io;
-use std::io::BufRead;
+use std::io::{BufRead, Write};
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -38,16 +37,20 @@ fn score(word: &str) -> u8 {
     score
 }
 
-fn main() {
-    use std::time::Instant;
-    let now = Instant::now();
-
-    let mut vec: Vec<String> = match file_to_vec("Wordlist.txt"){
+fn sort_and_save() -> io::Result<()>{
+    let mut words: Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Wordlist.txt"){
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
-    vec.sort_by_key(|s| Reverse(score(&s))); // sort values by score
+    words.sort_unstable_by(|a, b| score(b).cmp(&score(a))); // sort values by score
+    let mut file = File::options().write(true).open("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt")?;
 
-    let elapsed = now.elapsed();
-    println!("Elapsed: {:.2?}", elapsed);
+    for word in words{
+        writeln!(file, "{}", word)?;
+    }
+    Ok(())
+}
+
+fn main() {
+    sort_and_save().expect("no work :(");
 }

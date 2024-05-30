@@ -64,29 +64,27 @@ fn load_words() -> Vec<String>{
     words
 }
 
-fn search_by_prompt(words: String, prompt: &str) -> String{
+fn search_by_prompt(words: &String, prompt: &str) -> (String,usize,usize){
     let pattern = [prompt];
 
     // find first substring matching the prompt
     let ac = AhoCorasick::new(pattern).unwrap();
-    let mat = ac.find(&words).expect("should have a match");
+    let mat = ac.find(&words).expect("NO MATCH FOUND");
 
-    // expane the substring to contain the full word
-    let mut start_position = mat.start();
-    while start_position > 0 &&
-        !words.chars().nth(start_position - 1).expect("nuh uh").is_whitespace() {
-        start_position -= 1;
+    // expand the substring to contain the full word
+    let mut start = mat.start();
+    while start > 0 &&
+        !words.chars().nth(start - 1).expect("to far back").is_whitespace() {
+        start -= 1;
     }
 
     let mut end = mat.start() + 1;
     while end < words.len() &&
-        !words.chars().nth(end).expect("nuh uh").is_whitespace() {
+        !words.chars().nth(end).expect("to far forward").is_whitespace() {
         end += 1;
     }
 
-    // println!("{:?}",mat);
-    // println!("{}",&words[start_position..end]);
-    words[start_position..end].to_string()
+    (words[start..end].to_string(),start,end)
 }
 
 /// GUI
@@ -94,6 +92,8 @@ struct MainWindow {
     prompt: String,
     words: String,
     best_word: String,
+    start: usize,
+    end: usize,
 }
 
 impl Default for MainWindow {
@@ -102,6 +102,8 @@ impl Default for MainWindow {
             prompt: Default::default(),
             words: load_words().join(" "),
             best_word: Default::default(),
+            start: 0,
+            end: 0,
         }
     }
 }
@@ -112,25 +114,29 @@ impl eframe::App for MainWindow {
             let response = ui.add(egui::TextEdit::singleline(&mut self.prompt));
             if response.changed() {
                 self.prompt = self.prompt.to_uppercase();
-                self.best_word = search_by_prompt(self.words.clone(), &self.prompt);
-                println!("{:?}\n{:?}",self.prompt,self.best_word);
+                let ans = search_by_prompt(&self.words, &self.prompt);
+                self.best_word = ans.0;
+                self.start = ans.1;
+                self.end = ans.2;
+                // println!("{:?}\n{:?}",self.prompt,self.best_word);
             }
+
+            if ui.button("Play Word").clicked() {
+                // play the word
+                // replace the word with a string that will never match, so that no words are reused
+                self.words.replace_range(self.start..self.end,"-");
+            }
+
+            ui.horizontal(|ui| {
+                ui.label(&self.best_word);
+            });
+            ui.end_row();
         });
-        // display best word
+
     }
 }
 
 fn main() -> Result<(), eframe::Error>{
-    // use std::time::Instant;
-    // let now = Instant::now();
-    //
-    //
-    //
-    // println!("{:?}",ans);
-    //
-    // let elapsed = now.elapsed();
-    // println!("Completed in: {:.2?}", elapsed);
-
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([640.0, 480.0]),

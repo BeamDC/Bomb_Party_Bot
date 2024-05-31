@@ -42,12 +42,12 @@ fn score(word: &str) -> u8 {
 }
 
 fn sort_and_save() -> io::Result<()>{
-    let mut words: Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Wordlist.txt"){
+    let mut words: Vec<String> = match file_to_vec("Wordlist.txt"){
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
     words.sort_unstable_by(|a, b| score(b).cmp(&score(a))); // sort values by score
-    let mut file = File::options().write(true).open("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt")?;
+    let mut file = File::options().write(true).open("Sorted_Words.txt")?;
 
     for word in words{
         writeln!(file, "{}", word)?;
@@ -57,7 +57,7 @@ fn sort_and_save() -> io::Result<()>{
 
 /// loading words, searching by prompt, output handling
 fn load_words() -> Vec<String>{
-    let words:Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt"){
+    let words:Vec<String> = match file_to_vec("Sorted_Words.txt"){
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
@@ -74,13 +74,13 @@ fn search_by_prompt(words: &String, prompt: &str) -> (String,usize,usize){
     // expand the substring to contain the full word
     let mut start = mat.start();
     while start > 0 &&
-        !words.chars().nth(start - 1).expect("to far back").is_whitespace() {
+        !words.chars().nth(start - 1).expect("too far back").is_whitespace() {
         start -= 1;
     }
 
     let mut end = mat.start() + 1;
     while end < words.len() &&
-        !words.chars().nth(end).expect("to far forward").is_whitespace() {
+        !words.chars().nth(end).expect("too far forward").is_whitespace() {
         end += 1;
     }
 

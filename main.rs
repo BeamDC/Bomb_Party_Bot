@@ -4,8 +4,9 @@ use std::io;
 use std::io::{BufRead, Write};
 use std::path::Path;
 
-use aho_corasick::AhoCorasick;
+use aho_corasick::{AhoCorasick, Match};
 use eframe::egui;
+use egui::Color32;
 use lazy_static::lazy_static;
 
 /// scoring, sorting, saving words
@@ -42,12 +43,12 @@ fn score(word: &str) -> u8 {
 }
 
 fn sort_and_save() -> io::Result<()>{
-    let mut words: Vec<String> = match file_to_vec("Wordlist.txt"){
+    let mut words: Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Wordlist.txt"){
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
     words.sort_unstable_by(|a, b| score(b).cmp(&score(a))); // sort values by score
-    let mut file = File::options().write(true).open("Sorted_Words.txt")?;
+    let mut file = File::options().write(true).open("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt")?;
 
     for word in words{
         writeln!(file, "{}", word)?;
@@ -57,7 +58,7 @@ fn sort_and_save() -> io::Result<()>{
 
 /// loading words, searching by prompt, output handling
 fn load_words() -> Vec<String>{
-    let words:Vec<String> = match file_to_vec("Sorted_Words.txt"){
+    let words:Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt"){
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
@@ -69,16 +70,19 @@ fn search_by_prompt(words: &String, prompt: &str) -> (String,usize,usize){
 
     // find first substring matching the prompt
     let ac = AhoCorasick::new(pattern).unwrap();
-    let mat = ac.find(&words).expect("NO MATCH FOUND");
+    let mat = ac.find(&words);
+
+    let Some(matches) = Some(mat) else { return ("NO MATCH".to_string(),0,0); } ;
+    if matches.is_none() {return ("NO MATCH".to_string(),0,0);}
 
     // expand the substring to contain the full word
-    let mut start = mat.start();
+    let mut start = mat.expect("still no match?").start();
     while start > 0 &&
         !words.chars().nth(start - 1).expect("to far back").is_whitespace() {
         start -= 1;
     }
 
-    let mut end = mat.start() + 1;
+    let mut end = mat.expect("still no match?").start() + 1;
     while end < words.len() &&
         !words.chars().nth(end).expect("to far forward").is_whitespace() {
         end += 1;
@@ -121,14 +125,15 @@ impl eframe::App for MainWindow {
                 // println!("{:?}\n{:?}",self.prompt,self.best_word);
             }
 
-            if ui.button("Play Word").clicked() {
+            if ui.button("Play Word").clicked() && self.best_word != "NO MATCH" {
                 // play the word
                 // replace the word with a string that will never match, so that no words are reused
-                self.words.replace_range(self.start..self.end,"-");
+                self.words.replace_range(self.start..self.end, "-");
             }
 
             ui.horizontal(|ui| {
-                ui.label(&self.best_word);
+                if self.best_word == "NO MATCH" { ui.colored_label(Color32::RED, &self.best_word); }
+                else { ui.colored_label(Color32::WHITE, &self.best_word); }
             });
             ui.end_row();
         });
@@ -137,22 +142,12 @@ impl eframe::App for MainWindow {
 }
 
 fn main() -> Result<(), eframe::Error>{
-    // use std::time::Instant;
-    // let now = Instant::now();
-    //
-    //
-    //
-    // println!("{:?}",ans);
-    //
-    // let elapsed = now.elapsed();
-    // println!("Completed in: {:.2?}", elapsed);
-
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([640.0, 480.0]),
         ..Default::default()
     };
-    eframe::run_native("Visual Sorting",options,
+    eframe::run_native("Bomb Party Solver",options,
                        Box::new(|cc| {
                            Box::<MainWindow>::default()
                        }),

@@ -74,13 +74,13 @@ fn search_by_prompt(words: &String, prompt: &str) -> (String,usize,usize){
     // expand the substring to contain the full word
     let mut start = mat.start();
     while start > 0 &&
-        !words.chars().nth(start - 1).expect("too far back").is_whitespace() {
+        !words.chars().nth(start - 1).expect("to far back").is_whitespace() {
         start -= 1;
     }
 
     let mut end = mat.start() + 1;
     while end < words.len() &&
-        !words.chars().nth(end).expect("too far forward").is_whitespace() {
+        !words.chars().nth(end).expect("to far forward").is_whitespace() {
         end += 1;
     }
 
@@ -137,6 +137,16 @@ impl eframe::App for MainWindow {
 }
 
 fn main() -> Result<(), eframe::Error>{
+    // use std::time::Instant;
+    // let now = Instant::now();
+    //
+    //
+    //
+    // println!("{:?}",ans);
+    //
+    // let elapsed = now.elapsed();
+    // println!("Completed in: {:.2?}", elapsed);
+
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([640.0, 480.0]),

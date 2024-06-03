@@ -43,12 +43,12 @@ fn score(word: &str) -> u8 {
 }
 
 fn sort_and_save() -> io::Result<()>{
-    let mut words: Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Wordlist.txt"){
+    let mut words: Vec<String> = match file_to_vec("Wordlist.txt"){
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
     words.sort_unstable_by(|a, b| score(b).cmp(&score(a))); // sort values by score
-    let mut file = File::options().write(true).open("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt")?;
+    let mut file = File::options().write(true).open("Sorted_Words.txt")?;
 
     for word in words{
         writeln!(file, "{}", word)?;
@@ -58,7 +58,7 @@ fn sort_and_save() -> io::Result<()>{
 
 /// loading words, searching by prompt, output handling
 fn load_words() -> Vec<String>{
-    let words:Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt"){
+    let words:Vec<String> = match file_to_vec("Sorted_Words.txt"){
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
@@ -122,7 +122,6 @@ impl eframe::App for MainWindow {
                 self.best_word = ans.0;
                 self.start = ans.1;
                 self.end = ans.2;
-                // println!("{:?}\n{:?}",self.prompt,self.best_word);
             }
 
             if ui.button("Play Word").clicked() && self.best_word != "NO MATCH" {

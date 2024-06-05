@@ -10,6 +10,8 @@ use egui::Color32;
 use lazy_static::lazy_static;
 
 /// scoring, sorting, saving words
+// when words are played, set the values of those letters to zero, 
+// find all words that match a prompt, then sort those words by the new scores 
 lazy_static! {
         static ref SCORES: HashMap<char, u8> = {
             let mut m = HashMap::new();

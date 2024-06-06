@@ -12,18 +12,21 @@ use lazy_static::lazy_static;
 /// scoring, sorting, saving words
 // when words are played, set the values of those letters to zero, 
 // find all words that match a prompt, then sort those words by the new scores 
-// instead of hash mapy, use a vec in main (self.scores)
+// instead of hash map, use a vec in main (self.score
 // pass this vector ovewr to the scoring function
 // this also makes changing the score easier, if lazystatics cant be modified easily
+// values can be modified using let Some(c) = SCORES.get_mut(&charval); *c = newval
+// https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=94631989e4d6ceb93a6988153c7d72d4
+// probably rewite this as a normal hash map, if above method does not work
+// also maybe make a module with all the non gui functionality, for organisation
 lazy_static! {
         static ref SCORES: HashMap<char, u8> = {
             let mut m = HashMap::new();
-            m.insert('A', 1); m.insert('E', 1); m.insert('I', 1); m.insert('O', 1); m.insert('U', 1);
-            m.insert('R', 1); m.insert('S', 1); m.insert('T', 1); m.insert('L', 1); m.insert('N', 1);
-            m.insert('D', 2); m.insert('G', 2); m.insert('B', 3); m.insert('C', 3); m.insert('M', 3);
-            m.insert('P', 3); m.insert('F', 4); m.insert('H', 4); m.insert('V', 4); m.insert('W', 4);
-            m.insert('Y', 4); m.insert('K', 5); m.insert('J', 8); m.insert('Q', 10); m.insert('X', 0);
-            m.insert('Z', 0);
+            m.insert('A', 1); m.insert('B', 1); m.insert('C', 1); m.insert('D', 1); m.insert('E', 1);
+            m.insert('F', 1); m.insert('G', 1); m.insert('H', 1); m.insert('I', 1); m.insert('J', 1);
+            m.insert('K', 1); m.insert('L', 1); m.insert('M', 1); m.insert('N', 1); m.insert('O', 1);
+            m.insert('P', 1); m.insert('Q', 1); m.insert('R', 1); m.insert('S', 1); m.insert('T', 1);
+            m.insert('U', 1); m.insert('V', 1); m.insert('W', 1); m.insert('Y', 1);
             m
         };
     }
@@ -35,9 +38,10 @@ fn file_to_vec(path: &str) -> io::Result<Vec<String>> {
     Ok(reader.lines().map(|line| line.unwrap()).collect())
 }
 
-// fn to score a word
+// get the score of a word
 fn score(word: &str) -> u8 {
     let mut score = 0;
+    // remove all diuplicate letters
     for c in word.chars() {
         match SCORES.get(&c) {
             Some(s) => score += *s,
@@ -47,6 +51,7 @@ fn score(word: &str) -> u8 {
     score
 }
 
+// sort all words by best score, output to file
 fn sort_and_save() -> io::Result<()>{
     let mut words: Vec<String> = match file_to_vec("Wordlist.txt"){
         Ok(words) => words,

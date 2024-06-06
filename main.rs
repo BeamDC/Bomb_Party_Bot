@@ -12,6 +12,9 @@ use lazy_static::lazy_static;
 /// scoring, sorting, saving words
 // when words are played, set the values of those letters to zero, 
 // find all words that match a prompt, then sort those words by the new scores 
+// instead of hash mapy, use a vec in main (self.scores)
+// pass this vector ovewr to the scoring function
+// this also makes changing the score easier, if lazystatics cant be modified easily
 lazy_static! {
         static ref SCORES: HashMap<char, u8> = {
             let mut m = HashMap::new();

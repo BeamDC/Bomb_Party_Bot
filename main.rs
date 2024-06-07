@@ -9,14 +9,6 @@ use eframe::egui;
 use egui::Color32;
 
 /// scoring, sorting, saving words
-// when words are played, set the values of those letters to zero,
-// find all words that match a prompt, then sort those words by the new scores
-// instead of hash map, use a vec in main (self.score
-// pass this vector over to the scoring function
-// this also makes changing the score easier, if lazystatics cant be modified easily
-// values can be modified using let Some(c) = SCORES.get_mut(&charval); *c = newval
-// https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=94631989e4d6ceb93a6988153c7d72d4
-// probably rewrite this as a normal hash map, if above method does not work
 // also maybe make a module with all the non gui functionality, for organisation
 
 static ALPHABET: &str = "ABCDEFGHIJKLMNOPQRSTUVWY";

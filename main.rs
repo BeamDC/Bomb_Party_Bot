@@ -62,6 +62,7 @@ fn load_words() -> Vec<String> {
     words
 }
 
+// https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=f5e5c2d1fd10e57095c1d6ca15102036
 fn search_by_prompt(words: &String, prompt: &str) -> (String, usize, usize) {
     let pattern = [prompt];
 

@@ -55,7 +55,7 @@ fn score(word: &str, scores: &HashMap<char, u8>) -> i8 {
 
 // sort all words by number of unique letters, output to file
 fn sort_and_save() -> io::Result<()> {
-    let mut words: Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Wordlist.txt") {
+    let mut words: Vec<String> = match file_to_vec("Wordlist.txt") {
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
@@ -64,7 +64,7 @@ fn sort_and_save() -> io::Result<()> {
         let b_unique: HashSet<char> = b.chars().filter(|c| c.is_alphabetic()).collect();
 
         b_unique.len().cmp(&a_unique.len())});
-    let mut file = File::options().write(true).open("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt")?;
+    let mut file = File::options().write(true).open("Sorted_Words.txt")?;
 
     for word in words {
         writeln!(file, "{}", word)?;
@@ -74,7 +74,7 @@ fn sort_and_save() -> io::Result<()> {
 
 /// loading words, searching by prompt, output handling
 fn load_words() -> Vec<String> {
-    let words: Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt") {
+    let words: Vec<String> = match file_to_vec("Sorted_Words.txt") {
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
@@ -161,7 +161,7 @@ impl Default for MainWindow {
 
         Self {
             prompt: Default::default(),
-            words_vec: match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt") {
+            words_vec: match file_to_vec("Sorted_Words.txt") {
                 Ok(words) => words,
                 Err(e) => panic!("Error reading file: {}", e),
             },

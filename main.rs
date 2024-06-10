@@ -23,7 +23,7 @@ use itertools::Itertools;
 use rayon::prelude::*;
 
 /// scoring, sorting, saving words
-static ALPHABET: &str = "ABCDEFGHIJKLMNOPQRSTUVWY";
+static ALPHABET: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 fn file_to_vec(path: &str) -> io::Result<Vec<String>> {
     let path = Path::new(path);
@@ -156,7 +156,8 @@ impl Default for MainWindow {
         scores.insert('Q', 1); scores.insert('R', 1);
         scores.insert('S', 1); scores.insert('T', 1);
         scores.insert('U', 1); scores.insert('V', 1);
-        scores.insert('W', 1); scores.insert('Y', 1);
+        scores.insert('W', 1); scores.insert('X', 1);
+        scores.insert('Y', 1); scores.insert('Z', 1);
 
         Self {
             prompt: Default::default(),

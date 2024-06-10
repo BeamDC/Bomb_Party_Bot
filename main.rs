@@ -7,6 +7,7 @@
 * - when the best word is found use enigo to automatically type it 
 *   - this might require a macro to set the input area
 * - when the program works automatically, remove the egui, as it is no longer needed
+* - check speed using wordlist sorted by score and by alpha, score sorting might be pointless
 */
 
 use std::collections::{HashMap, HashSet};

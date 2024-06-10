@@ -3,10 +3,13 @@ use std::fs::File;
 use std::io;
 use std::io::{BufRead, Write};
 use std::path::Path;
+use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
-use aho_corasick::AhoCorasick;
 use eframe::egui;
 use egui::Color32;
+use itertools::Itertools;
+use rayon::prelude::*;
 
 /// scoring, sorting, saving words
 // also maybe make a module with all the non gui functionality, for organisation
@@ -21,21 +24,29 @@ fn file_to_vec(path: &str) -> io::Result<Vec<String>> {
 }
 
 // get the score of a word
-fn score(word: &str, scores: &HashMap<char, u8>) -> u8 {
+fn score(word: &str, scores: &HashMap<char, u8>) -> i8 {
     let mut score = 0;
-    // remove all duplicate letters
+    let mut word: String = word.into();
+    let mut seen = HashSet::new();
+    word.retain(|c| {
+        let is_first =!seen.contains(&c);
+        seen.insert(c);
+        is_first
+    });
+    //score the unique letters
     for c in word.chars() {
         match scores.get(&c) {
             Some(s) => score += *s,
             None => (),
         }
     }
-    score
+    // println!("{} -> {}",word,score);
+    score as i8
 }
 
 // sort all words by number of unique letters, output to file
 fn sort_and_save() -> io::Result<()> {
-    let mut words: Vec<String> = match file_to_vec("Wordlist.txt") {
+    let mut words: Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Wordlist.txt") {
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
@@ -43,9 +54,8 @@ fn sort_and_save() -> io::Result<()> {
         let a_unique: HashSet<char> = a.chars().filter(|c| c.is_alphabetic()).collect();
         let b_unique: HashSet<char> = b.chars().filter(|c| c.is_alphabetic()).collect();
 
-        b_unique.len().cmp(&a_unique.len())
-    });
-    let mut file = File::options().write(true).open("Sorted_Words.txt")?;
+        b_unique.len().cmp(&a_unique.len())});
+    let mut file = File::options().write(true).open("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt")?;
 
     for word in words {
         writeln!(file, "{}", word)?;
@@ -55,48 +65,72 @@ fn sort_and_save() -> io::Result<()> {
 
 /// loading words, searching by prompt, output handling
 fn load_words() -> Vec<String> {
-    let words: Vec<String> = match file_to_vec("Sorted_Words.txt") {
+    let words: Vec<String> = match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt") {
         Ok(words) => words,
         Err(e) => panic!("Error reading file: {}", e),
     };
     words
 }
 
-// https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=f5e5c2d1fd10e57095c1d6ca15102036
-fn search_by_prompt(words: &String, prompt: &str) -> (String, usize, usize) {
-    let pattern = [prompt];
+fn find_best_word(vec: &Vec<(usize, String)>, scores: &HashMap<char, u8>) -> Option<(usize, String)> {
+    let max_score = Arc::new(Mutex::new(i8::MIN));
+    let result = Arc::new(Mutex::new(None));
 
-    // find first substring matching the prompt
-    let ac = AhoCorasick::new(pattern).unwrap();
-    let mat = ac.find(&words);
+    let max_score_clone = Arc::clone(&max_score);
+    let result_clone = Arc::clone(&result);
 
-    let Some(matches) = Some(mat) else { return ("NO MATCH".to_string(), 0, 0); };
-    if matches.is_none() { return ("NO MATCH".to_string(), 0, 0); }
+    vec.par_iter().for_each(|&(index, ref word)| {
+        let current_score = score(word, scores);
+        let mut max_score_guard = max_score_clone.lock().unwrap();
+        let mut result_guard = result_clone.lock().unwrap();
 
-    // expand the substring to contain the full word
-    let mut start = mat.expect("still no match?").start();
-    while start > 0 &&
-        !words.chars().nth(start - 1).expect("to far back").is_whitespace() {
-        start -= 1;
+        if current_score > *max_score_guard {
+            *max_score_guard = current_score;
+            *result_guard = Some((index, word.clone()));
+        }
+    });
+
+    let result_value = result.lock().unwrap();
+    Some(<Option<(usize, String)> as Clone>::clone(&result_value).unwrap_or_default())
+}
+
+fn search_by_prompt(words: &[String], prompt: &str, scores: &HashMap<char, u8>) -> (usize, String) {
+    let start = Instant::now();
+    let filter_start = Instant::now();
+    let mut matches: Vec<(usize, String)> = words.par_iter()
+        .enumerate() // Add enumeration to get the index
+        .filter(|&(index, word)| word.contains(prompt)) // Filter based on whether the word contains the prompt
+        .map(|(index, word)| (index, word.clone())) // Map to keep the index and clone the word
+        .collect(); // Collect the results into a vector
+    let filter_elapsed = filter_start.elapsed();
+    println!("word filtering completed in: {:.2?}",filter_elapsed);
+
+
+    if matches.is_empty() { return (0,"NO MATCH".to_string()); }
+    else {
+        // println!("{:?}",matches);
+        let sorting_start = Instant::now();
+        let best_word = find_best_word(&mut matches, scores);
+        let sorting_elapsed = sorting_start.elapsed();
+        let elapsed = start.elapsed();
+        println!("max search completed in: {:.2?}",sorting_elapsed);
+        println!("search for top {} words completed in: {:.2?}\n",matches.len(),elapsed);
+        // matches[0].clone()
+        match best_word {
+            Some(w) => return w,
+            None => return (0,"NO MATCH".to_string()),
+        }
+
     }
-
-    let mut end = mat.expect("still no match?").start() + 1;
-    while end < words.len() &&
-        !words.chars().nth(end).expect("to far forward").is_whitespace() {
-        end += 1;
-    }
-
-    (words[start..end].to_string(), start, end)
 }
 
 /// GUI
 struct MainWindow {
     prompt: String,
-    words: String,
+    words_vec: Vec<String>,
     scores: HashMap<char,u8>,
     best_word: String,
-    start: usize,
-    end: usize,
+    word_index: usize,
 }
 
 impl Default for MainWindow {
@@ -117,11 +151,13 @@ impl Default for MainWindow {
 
         Self {
             prompt: Default::default(),
-            words: load_words().join(" "),
+            words_vec: match file_to_vec("F:\\Programming\\Ethan\\Rust\\Bomb_Party_Solver\\src\\Sorted_Words.txt") {
+                Ok(words) => words,
+                Err(e) => panic!("Error reading file: {}", e),
+            },
             scores,
             best_word: Default::default(),
-            start: 0,
-            end: 0,
+            word_index: 0,
         }
     }
 }
@@ -129,19 +165,19 @@ impl Default for MainWindow {
 impl eframe::App for MainWindow {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            let response = ui.add(egui::TextEdit::singleline(&mut self.prompt));
-            if response.changed() {
+            ui.add(egui::TextEdit::singleline(&mut self.prompt));
+
+            if ui.button("Search").clicked(){
                 self.prompt = self.prompt.to_uppercase();
-                let ans = search_by_prompt(&self.words, &self.prompt);
-                self.best_word = ans.0;
-                self.start = ans.1;
-                self.end = ans.2;
+                let ans = search_by_prompt(&self.words_vec, &self.prompt, &self.scores);
+                self.word_index = ans.0;
+                self.best_word = ans.1;
             }
 
             if ui.button("Play Word").clicked() && self.best_word != "NO MATCH" {
                 // play the word
-                // replace the word with a string that will never match, so that no words are reused
-                self.words.replace_range(self.start..self.end, "-");
+                // delete the word
+                self.words_vec.remove(self.word_index);
                 // change scoring for words to align with unused letters
                 for c in self.best_word.chars(){
                     if let Some(x) = self.scores.get_mut(&c){
@@ -155,6 +191,7 @@ impl eframe::App for MainWindow {
                             *x = 1;
                         }
                     }
+                    println!("EXTRA LIFE <3");
                 }
             }
 
@@ -167,7 +204,11 @@ impl eframe::App for MainWindow {
 }
 
 fn main() -> Result<(), eframe::Error> {
-
+    // use std::time::Instant;
+    // let now = Instant::now();
+    // sort_and_save().expect("TODO: panic message");
+    // let elapsed = now.elapsed();
+    // println!("sorted and saved in: {:.2?}", elapsed);
 
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
@@ -175,7 +216,7 @@ fn main() -> Result<(), eframe::Error> {
         ..Default::default()
     };
     eframe::run_native("Bomb Party Solver", options,
-                       Box::new(|cc| {
+                       Box::new(|_cc| {
                            Box::<MainWindow>::default()
                        }),
     )

@@ -1,3 +1,14 @@
+/*
+* TODO: 
+* - make macros to read keypresses, 
+*   - have one to set the location of the bomb
+*   - have another to got to that location and copy the prompt
+* - when the prompt is copied, pass it to the search fn
+* - when the best word is found use enigo to automatically type it 
+*   - this might require a macro to set the input area
+* - when the program works automatically, remove the egui, as it is no longer needed
+*/
+
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io;
@@ -12,8 +23,6 @@ use itertools::Itertools;
 use rayon::prelude::*;
 
 /// scoring, sorting, saving words
-// also maybe make a module with all the non gui functionality, for organisation
-
 static ALPHABET: &str = "ABCDEFGHIJKLMNOPQRSTUVWY";
 
 fn file_to_vec(path: &str) -> io::Result<Vec<String>> {

@@ -6,7 +6,8 @@
 * - when the prompt is copied, pass it to the search fn
 * - when the best word is found use enigo to automatically type it 
 *   - this might require a macro to set the input area
-* - when the program works automatically, remove the egui, as it is no longer needed
+* - repurpose the egui to be a setting menu for the bot
+*   - once the setting are set, close the window and start the bot
 * - check speed using wordlist sorted by score and by alpha, score sorting might be pointless
 */
 

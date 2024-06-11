@@ -10,6 +10,7 @@
 * - check speed using wordlist sorted by score and by alpha, score sorting might be pointless
 */
 
+// data related
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io;
@@ -17,11 +18,14 @@ use std::io::{BufRead, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
+use rayon::prelude::*;
 
+// gui related
 use eframe::egui;
 use egui::Color32;
 use itertools::Itertools;
-use rayon::prelude::*;
+
+// keyboard & mouse related
 
 /// scoring, sorting, saving words
 static ALPHABET: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

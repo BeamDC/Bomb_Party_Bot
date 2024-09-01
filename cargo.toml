@@ -1,0 +1,17 @@
+[package]
+name = "Bomb_Party_Solver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lazy_static = "1.5.0"
+rand = "0.9.0-alpha.1"
+env_logger = "0.11.5"
+egui = "0.28.1"
+eframe = "0.28.1"
+rayon = "1.10.0"
+itertools = "0.13.0"
+crossterm = "0.28.1"
+cli-clipboard = "0.4.0"
+rdev = "0.5.3"
+device_query = "2.1.0"
